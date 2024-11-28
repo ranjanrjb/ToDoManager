@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Task Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #818cf8;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        .task-form-card {
+            background: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .task-card {
+            background: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .priority-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .priority-high {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .priority-medium {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .priority-low {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .task-actions button {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .completed-task {
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .task-form-card {
+                padding: 1rem;
+            }
+            
+            .task-actions {
+                flex-direction: column;
+            }
+            
+            .task-actions button {
+                width: 100%;
+            }
+        }
+
+        .border-danger {
+            border: 1px solid #dc3545;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.1);
+        }
+
+        .border-danger:hover {
+            box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2);
+        }
+
+        .common-tasks button {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+        }
+
+        .common-tasks button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .common-tasks i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .common-tasks-container {
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+            margin-bottom: 1rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .common-tasks-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .common-tasks-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .common-tasks-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .common-tasks {
+            padding: 0.5rem;
+        }
+
+        .common-tasks button {
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            position: relative;
+            margin-bottom: 0.5rem;
+        }
+
+        .common-tasks button:last-child {
+            margin-bottom: 0;
+        }
+
+        .common-tasks button .delete-task {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .common-tasks button:hover .delete-task {
+            opacity: 1;
+        }
+
+        .common-tasks button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .tasks-container {
+            height: calc(100vh - 250px);
+            overflow-y: auto;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        .tasks-container:empty {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .tasks-container:empty::before {
+            content: 'No tasks yet';
+            font-size: 1.1rem;
+        }
+
+        .missed-tasks-container {
+            background-color: rgba(254, 226, 226, 0.3);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .completed-tasks-container {
+            background-color: rgba(220, 252, 231, 0.3);
+            border: 1px solid rgba(22, 163, 74, 0.2);
+        }
+
+        .task-sections-row {
+            margin-bottom: 2rem;
+        }
+
+        @keyframes highlight {
+            0% { background-color: var(--card-background); }
+            50% { background-color: #e8f0fe; }
+            100% { background-color: var(--card-background); }
+        }
+
+        .task-edit-form {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .navbar .btn-outline-light {
+            border-radius: 20px;
+            padding: 0.5rem 1.2rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .btn-outline-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-brain me-2"></i>AI Task Manager
+            </a>
+            <button class="btn btn-outline-light" onclick="scrollToAddTask()">
+                <i class="fas fa-plus me-2"></i>Add Task
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row task-sections-row">
+            <div class="col-md-6">
+                <h3 class="section-title">
+                    <i class="fas fa-tasks me-2"></i>Current Tasks
+                </h3>
+                <div class="tasks-container">
+                    {% for task in incomplete_tasks %}
+                    <div class="task-card" id="task-{{ task.id }}">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h4 class="task-title" id="title-{{ task.id }}">{{ task.title }}</h4>
+                            <span class="priority-badge {% if task.importance >= 4 %}priority-high{% elif task.importance >= 2 %}priority-medium{% else %}priority-low{% endif %}">
+                                Importance: {{ task.importance }}
+                            </span>
+                        </div>
+                        <div class="task-content" id="content-{{ task.id }}">
+                            <p class="mb-2">{{ task.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Due: {{ task.due_date }} at {{ task.due_time }}</small>
+                                <div class="task-actions">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="toggleEdit({{ task.id }})">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </button>
+                                    <form action="{{ url_for('complete_task', task_id=task.id) }}" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-outline-success btn-sm">
+                                            <i class="fas fa-check me-1"></i>Complete
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('delete_task', task_id=task.id) }}" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="task-edit-form d-none" id="edit-{{ task.id }}">
+                            <form action="{{ url_for('add_task') }}" method="POST">
+                                <input type="hidden" name="task_id" value="{{ task.id }}">
+                                <div class="mb-2">
+                                    <input type="text" class="form-control" name="title" value="{{ task.title }}" required>
+                                </div>
+                                <div class="mb-2">
+                                    <textarea class="form-control" name="description" rows="2" required>{{ task.description }}</textarea>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-7">
+                                                <input type="date" class="form-control" name="due_date" value="{{ task.due_date }}" required>
+                                            </div>
+                                            <div class="col-5">
+                                                <input type="time" class="form-control" name="due_time" value="{{ task.due_time }}" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select class="form-select" name="importance" required>
+                                            <option value="1" {% if task.importance == 1 %}selected{% endif %}>1 - Low</option>
+                                            <option value="2" {% if task.importance == 2 %}selected{% endif %}>2 - Medium-Low</option>
+                                            <option value="3" {% if task.importance == 3 %}selected{% endif %}>3 - Medium</option>
+                                            <option value="4" {% if task.importance == 4 %}selected{% endif %}>4 - Medium-High</option>
+                                            <option value="5" {% if task.importance == 5 %}selected{% endif %}>5 - High</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleEdit({{ task.id }})">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-primary btn-sm ms-2">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <h3 class="section-title text-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>Missed Tasks
+                </h3>
+                <div class="tasks-container missed-tasks-container">
+                    {% for task in missed_tasks %}
+                    <div class="task-card border-danger">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h4>{{ task.title }}</h4>
+                            <span class="priority-badge priority-high">
+                                Overdue
+                            </span>
+                        </div>
+                        <p class="mb-2">{{ task.description }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-danger">Due: {{ task.due_date }} at {{ task.due_time }}</small>
+                            <div class="task-actions">
+                                <button class="btn btn-outline-primary btn-sm" onclick="toggleEdit({{ task.id }})">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                <form action="{{ url_for('complete_task', task_id=task.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-check me-1"></i>Complete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <h3 class="section-title">
+                    <i class="fas fa-check-circle me-2"></i>Completed Tasks
+                </h3>
+                <div class="tasks-container completed-tasks-container">
+                    {% for task in completed_tasks %}
+                    <div class="task-card completed-task">
+                        <h4>{{ task.title }}</h4>
+                        <p class="mb-2">{{ task.description }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Completed</small>
+                            <form action="{{ url_for('uncomplete_task', task_id=task.id) }}" method="POST">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-undo me-1"></i>Undo Complete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="task-form-card">
+                    <h2 class="mb-4"><i class="fas fa-plus-circle me-2"></i>Add Task</h2>
+                    <form method="POST" action="{{ url_for('add_task') }}" onsubmit="return validateForm()">
+                        <input type="hidden" name="task_id" id="task_id">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="title" id="title" placeholder="Task Title" required>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="row">
+                                    <div class="col-7">
+                                        <input type="date" class="form-control" name="due_date" id="due_date" required>
+                                    </div>
+                                    <div class="col-5">
+                                        <input type="time" class="form-control" name="due_time" id="due_time" required>
+                                    </div>
+                                </div>
+                                <div class="invalid-feedback">Due date/time cannot be in the past</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <textarea class="form-control" name="description" id="description" placeholder="Task Description" rows="3" required></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" name="importance" id="importance" required>
+                                    <option value="" disabled selected>Select Importance (1-5)</option>
+                                    <option value="1">1 - Low</option>
+                                    <option value="2">2 - Medium-Low</option>
+                                    <option value="3">3 - Medium</option>
+                                    <option value="4">4 - Medium-High</option>
+                                    <option value="5">5 - High</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-end mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Task
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="task-form-card">
+                    <h2 class="mb-4"><i class="fas fa-star me-2"></i>Common Tasks</h2>
+                    <div class="add-common-task mb-3">
+                        <div class="input-group">
+                            <input type="text" id="newCommonTask" class="form-control" placeholder="New common task">
+                            <button class="btn btn-primary" onclick="addCommonTask()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="common-tasks-container">
+                        <div id="commonTasksList" class="common-tasks">
+                            <!-- Tasks will be loaded here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Set minimum date to today for the due date input
+        window.onload = function() {
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById('due_date').setAttribute('min', today);
+            
+            // Set default time to next hour
+            var now = new Date();
+            now.setHours(now.getHours() + 1, 0, 0); // Next hour, 0 minutes, 0 seconds
+            var defaultTime = now.toTimeString().slice(0,5);
+            document.getElementById('due_time').value = defaultTime;
+            
+            loadCommonTasks();
+        }
+
+        function validateForm() {
+            var dueDate = document.getElementById('due_date').value;
+            var dueTime = document.getElementById('due_time').value;
+            var dueDatetime = new Date(dueDate + 'T' + dueTime);
+            var now = new Date();
+
+            if (dueDatetime < now) {
+                alert('Due date and time cannot be in the past!');
+                return false;
+            }
+            return true;
+        }
+
+        function toggleEdit(taskId) {
+            const contentDiv = document.getElementById(`content-${taskId}`);
+            const editDiv = document.getElementById(`edit-${taskId}`);
+            
+            if (contentDiv.classList.contains('d-none')) {
+                // Switch back to view mode
+                contentDiv.classList.remove('d-none');
+                editDiv.classList.add('d-none');
+            } else {
+                // Switch to edit mode
+                contentDiv.classList.add('d-none');
+                editDiv.classList.remove('d-none');
+            }
+        }
+
+        function fillTaskTitle(title) {
+            document.getElementById('title').value = title;
+            document.getElementById('title').focus();
+            // Smooth scroll to description field
+            document.getElementById('description').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function loadCommonTasks() {
+            fetch('/get_common_tasks')
+                .then(response => response.json())
+                .then(tasks => {
+                    const container = document.getElementById('commonTasksList');
+                    container.innerHTML = '';
+                    tasks.forEach(task => {
+                        container.innerHTML += `
+                            <button class="btn btn-outline-secondary mb-2 w-100 text-start" onclick="fillTaskTitle('${task.title}')">
+                                <i class="fas fa-tasks me-2"></i>${task.title}
+                                <span class="delete-task" onclick="deleteCommonTask(event, ${task.id})">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            </button>
+                        `;
+                    });
+                });
+        }
+
+        function addCommonTask() {
+            const input = document.getElementById('newCommonTask');
+            const title = input.value.trim();
+            
+            if (title) {
+                fetch('/add_common_task', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ title: title })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        input.value = '';
+                        loadCommonTasks();
+                    }
+                });
+            }
+        }
+
+        function deleteCommonTask(event, taskId) {
+            event.stopPropagation();  // Prevent triggering the parent button's onclick
+            
+            fetch(`/delete_common_task/${taskId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadCommonTasks();
+                }
+            });
+        }
+
+        function scrollToAddTask() {
+            const addTaskSection = document.querySelector('.task-form-card');
+            addTaskSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Add highlight animation
+            addTaskSection.style.animation = 'none';
+            addTaskSection.offsetHeight; // Trigger reflow
+            addTaskSection.style.animation = 'highlight 1s';
+        }
+    </script>
+</body>
+</html>
